@@ -1,4 +1,5 @@
 const { app, Menu } = require('electron');
+const actions = require('./actions');
 
 const isMac = process.platform === 'darwin';
 
@@ -18,6 +19,13 @@ const template = [
   {
     label: 'File',
     submenu: [
+      {
+        label: 'New',
+        accelerator: 'CmdOrCtrl+N',
+        click: () => {
+          const window = actions.createNewFileWindow();
+        }
+      },
       isMac ? { role: 'close' } : { role: 'quit' }
     ]
   },

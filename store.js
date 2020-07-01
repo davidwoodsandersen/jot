@@ -30,4 +30,10 @@ class Store {
   }
 }
 
-module.exports = Store;
+module.exports = new Store({
+  configName: 'user-preferences',
+  defaults: {
+    windowWidth: 1000,
+    windowHeight: 800
+  }
+});
