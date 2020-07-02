@@ -13591,8 +13591,9 @@ var _quill = _interopRequireDefault(require("quill"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var editor = new _quill["default"]('#editor', {
+window.editor = new _quill["default"]('#editor', {
   theme: 'snow'
 });
+window.editor.focus();
 
 },{"quill":4}]},{},[5]);

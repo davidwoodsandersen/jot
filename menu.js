@@ -26,6 +26,13 @@ const template = [
           const window = actions.createNewFileWindow();
         }
       },
+      {
+        label: 'Open File...',
+        accelerator: 'CmdOrCtrl+O',
+        click: () => {
+          actions.openFile();
+        }
+      },
       isMac ? { role: 'close' } : { role: 'quit' }
     ]
   },

@@ -1,5 +1,7 @@
 import Quill from 'quill';
 
-const editor = new Quill('#editor', {
+window.editor = new Quill('#editor', {
   theme: 'snow'
 });
+
+window.editor.focus();
