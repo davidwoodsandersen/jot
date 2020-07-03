@@ -13591,12 +13591,14 @@ var _quill = _interopRequireDefault(require("quill"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-window.editor = new _quill["default"]('#editor', {
+var editor = window.editor = new _quill["default"]('#editor', {
   theme: 'snow'
 });
-window.editor.on('text-change', function (delta, oldDelta, source) {
+editor.on('text-change', function (delta, oldDelta, source) {
   if (!!window.ipc && typeof window.windowId === 'number') {
-    window.ipc.send('text-change', window.windowId, window.editor.getText());
+    window.ipc.send('text-change', window.windowId, {
+      content: editor.getText()
+    });
   }
 });
 window.editor.focus();

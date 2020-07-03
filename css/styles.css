@@ -19,8 +19,6 @@ time, mark, audio, video {
   margin: 0;
   padding: 0;
   border: 0;
-  font-size: 100%;
-  font: inherit;
   vertical-align: baseline;
 }
 
@@ -64,14 +62,15 @@ html, body {
 
 body {
   --base-font-family: Helvetica, sans-serif;
+  --editor-font-family: 'Ubuntu Mono', Helvetica, sans-serif;
   --base-font-size: 16px;
-  --bg-color: rgb(240, 240, 240);
+  --editor-font-size: 22px;
+  --grey: rgb(240, 240, 240);
   --contracted-height: 50px;
   --side-margin: 40px;
 }
 
 body {
-  background-color: var(--bg-color);
   font-family: var(--base-font-family);
   font-size: var(--base-font-size);
 }
@@ -93,12 +92,19 @@ body {
   padding: 12px;
   background-color: white;
   border-radius: 20px 20px 0 0;
+  border: 2px solid var(--grey);
+  border-bottom: none;
 }
 
 #app .ql-snow {
   border: none;
 }
 
-.ql-container {
+#app .ql-container {
   font-size: var(--base-font-size);
+}
+
+#app .ql-editor {
+  font-family: var(--editor-font-family);
+  font-size: var(--editor-font-size);
 }

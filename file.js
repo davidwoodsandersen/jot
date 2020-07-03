@@ -71,8 +71,8 @@ function getById(id) {
   return openFiles[id];
 }
 
-ipcMain.on('text-change', (event, id, text) => {
-  openFiles[id].data.content = text;
+ipcMain.on('text-change', (event, id, data) => {
+  openFiles[id].data = data;
 });
 
 module.exports = {
