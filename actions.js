@@ -3,7 +3,7 @@ const { BrowserWindow, dialog } = require('electron');
 const file = require('./file');
 const store = require('./store');
 
-function createNewFileWindow() {
+function createWindow() {
   const window = new BrowserWindow({
     width: store.get('windowWidth'),
     height: store.get('windowHeight'),
@@ -21,21 +21,37 @@ function createNewFileWindow() {
   return window;
 }
 
+function createFile() {
+  return file.create({
+    isNew: true,
+    filePath: null,
+    window: createWindow()
+  });
+}
+
 function openFile() {
   let files = dialog.showOpenDialogSync({
     properties: ['openFile', 'multiSelections'],
     filters: [
-      { name: 'Text File', extensions: ['jot'] }
+      { name: 'Jot File', extensions: ['jot'] }
     ]
   });
   if (!files || !files.length) return;
   files = files.map(f => file.create({
     filePath: f,
-    window: createNewFileWindow()
+    window: createWindow()
   }));
 }
 
+function saveFile() {
+  const currentFile = file.getByWindow(BrowserWindow.getFocusedWindow());
+  if (!currentFile) return;
+  currentFile.save();
+}
+
 module.exports = {
-  createNewFileWindow,
-  openFile
+  createWindow,
+  createFile,
+  openFile,
+  saveFile
 };

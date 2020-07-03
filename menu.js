@@ -23,7 +23,7 @@ const template = [
         label: 'New',
         accelerator: 'CmdOrCtrl+N',
         click: () => {
-          const window = actions.createNewFileWindow();
+          const file = actions.createFile();
         }
       },
       {
@@ -31,6 +31,13 @@ const template = [
         accelerator: 'CmdOrCtrl+O',
         click: () => {
           actions.openFile();
+        }
+      },
+      {
+        label: 'Save',
+        accelerator: 'CmdOrCtrl+S',
+        click: () => {
+          actions.saveFile();
         }
       },
       isMac ? { role: 'close' } : { role: 'quit' }

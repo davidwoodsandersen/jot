@@ -3,10 +3,10 @@ const menu = require('./menu');
 const store = require('./store');
 const actions = require('./actions');
 
-let mainWindow;
+let initialFile;
 
-function createWindow() {
-  mainWindow = actions.createNewFileWindow();
+function createFile() {
+  initialFile = actions.createFile();
 }
 
 function createMenu() {
@@ -15,10 +15,10 @@ function createMenu() {
 
 app.whenReady().then(() => {
   createMenu();
-  createWindow();
+  createFile();
   app.on('activate', function() {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
+      createFile();
     }
   });
 });
