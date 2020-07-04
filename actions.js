@@ -16,7 +16,7 @@ function createWindow() {
     let { width, height } = window.getBounds();
     store.set('windowWidth', width);
     store.set('windowHeight', height);
-  })
+  });
   window.loadFile('index.html');
   return window;
 }

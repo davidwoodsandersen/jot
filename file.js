@@ -8,14 +8,14 @@ class File {
     this.webContents = this.window.webContents;
     this.id = this.webContents.id;
     this.filePath = opts.filePath || null;
-    this.data = opts.data || { content: '' };
+    this.data = opts.data || { content: '', words: 0 };
     this.syncData();
   }
 
   syncData() {
     this.webContents.on('did-finish-load', () => {
       this.webContents.send('setWindowId', this.id);
-      this.webContents.send('injectFileData', this.data.content);
+      this.webContents.send('injectFileData', this.data);
     });
   }
 

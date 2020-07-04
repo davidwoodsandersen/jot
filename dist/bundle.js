@@ -13591,16 +13591,83 @@ var _quill = _interopRequireDefault(require("quill"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var editor = window.editor = new _quill["default"]('#editor', {
-  theme: 'snow'
-});
-editor.on('text-change', function (delta, oldDelta, source) {
-  if (!!window.ipc && typeof window.windowId === 'number') {
-    window.ipc.send('text-change', window.windowId, {
-      content: editor.getText()
-    });
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Dashboard = /*#__PURE__*/function () {
+  function Dashboard() {
+    _classCallCheck(this, Dashboard);
+
+    this.container = document.getElementById('stats');
   }
-});
-window.editor.focus();
+
+  _createClass(Dashboard, [{
+    key: "update",
+    value: function update(wordCount) {
+      this.container.textContent = "Word count: ".concat(wordCount);
+    }
+  }]);
+
+  return Dashboard;
+}();
+
+var File = /*#__PURE__*/function () {
+  function File() {
+    var _this = this;
+
+    _classCallCheck(this, File);
+
+    this.data = {
+      content: '',
+      words: 0
+    };
+    this.dashboard = new Dashboard();
+    this.editor = new _quill["default"]('#editor', {
+      theme: 'snow',
+      modules: {
+        toolbar: false
+      }
+    });
+    this.editor.on('text-change', function () {
+      var text = _this.editor.getText();
+
+      var words = text.replace('\n', '').split(' ').filter(function (w) {
+        return !!w;
+      }).length;
+
+      _this.setContent(text);
+
+      _this.setWords(words);
+
+      _this.dashboard.update(words);
+
+      if (!!window.ipc && typeof window.windowId === 'number') {
+        window.ipc.send('text-change', window.windowId, _this.data);
+      }
+    });
+    this.editor.focus();
+  }
+
+  _createClass(File, [{
+    key: "setContent",
+    value: function setContent(content, updateEditor) {
+      this.data.content = content;
+      if (updateEditor) this.editor.setText(content);
+    }
+  }, {
+    key: "setWords",
+    value: function setWords(words, updateDashboard) {
+      this.data.words = words;
+      if (updateDashboard) this.dashboard.update(this.data.words);
+    }
+  }]);
+
+  return File;
+}();
+
+var file = window.file = new File();
 
 },{"quill":4}]},{},[5]);
