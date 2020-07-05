@@ -13592,6 +13592,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
+var _progressBar = _interopRequireDefault(require("./progress-bar"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -13600,48 +13604,41 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 var Dashboard = /*#__PURE__*/function () {
   function Dashboard(file) {
-    var _this = this;
-
     _classCallCheck(this, Dashboard);
 
     this.file = file;
-    this.wordCount = document.getElementById('current-count');
-    this.wordTarget = document.getElementById('target');
-    this.wordTarget.value = this.file.data.target;
-    this.updatePercentage();
-    this.wordTarget.addEventListener('change', function (e) {
-      _this.file.setTarget(Number(e.target.value));
-    });
+    this.initDomElements();
+    this.progressBar = new _progressBar["default"](this.file.data.words, this.file.data.target);
   }
 
   _createClass(Dashboard, [{
-    key: "updateProgressBar",
-    value: function updateProgressBar(percentage) {
-      if (!this.progressEl) {
-        this.progressEl = document.createElement('style');
-        document.head.appendChild(this.progressEl);
-      }
+    key: "initDomElements",
+    value: function initDomElements() {
+      var _this = this;
 
-      this.progressEl.textContent = "#word-count:before { width: ".concat(percentage, "% !important; }");
+      this.els = {
+        wordsWritten: document.getElementById('words-written'),
+        wordsTarget: document.getElementById('words-target')
+      };
+      this.els.wordsTarget.value = this.file.data.target;
+      this.els.wordsTarget.addEventListener('change', function (e) {
+        _this.file.setTarget(Number(e.target.value));
+      });
     }
   }, {
-    key: "updatePercentage",
-    value: function updatePercentage() {
-      var words = this.file.data.words;
-      var target = this.file.data.target;
-      var percentage = Math.floor(words / target * 100).toFixed(0);
-      this.updateProgressBar(percentage);
-    }
-  }, {
-    key: "setTarget",
-    value: function setTarget(target, updateField) {
-      this.updatePercentage();
-      if (updateField) this.wordTarget.value = target;
+    key: "setWordCount",
+    value: function setWordCount(words) {
+      this.els.wordsWritten.textContent = "".concat(words, "/");
     }
   }, {
     key: "update",
-    value: function update(wordCount) {
-      this.wordCount.textContent = "".concat(wordCount, "/");
+    value: function update(setTarget) {
+      if (setTarget) {
+        this.els.wordsTarget.value = this.file.data.target;
+      }
+
+      this.setWordCount(this.file.data.words);
+      this.progressBar.update(this.file.data.words, this.file.data.target);
     }
   }]);
 
@@ -13651,7 +13648,7 @@ var Dashboard = /*#__PURE__*/function () {
 exports["default"] = Dashboard;
 ;
 
-},{}],6:[function(require,module,exports){
+},{"./progress-bar":8}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13680,18 +13677,28 @@ var File = /*#__PURE__*/function () {
       words: 0,
       target: 500
     };
-    this.dashboard = new _dashboard["default"](this);
-    this.editor = new _quill["default"]('#editor', {
-      theme: 'snow',
-      modules: {
-        toolbar: false
-      }
-    });
-    this.editor.on('text-change', this.handleTextChange.bind(this));
-    this.editor.focus();
+    this.initDashboard();
+    this.initEditor();
   }
 
   _createClass(File, [{
+    key: "initDashboard",
+    value: function initDashboard() {
+      this.dashboard = new _dashboard["default"](this);
+    }
+  }, {
+    key: "initEditor",
+    value: function initEditor() {
+      this.editor = new _quill["default"]('#editor', {
+        theme: 'snow',
+        modules: {
+          toolbar: false
+        }
+      });
+      this.editor.on('text-change', this.handleTextChange.bind(this));
+      this.editor.focus();
+    }
+  }, {
     key: "handleTextChange",
     value: function handleTextChange() {
       var text = this.editor.getText();
@@ -13700,8 +13707,7 @@ var File = /*#__PURE__*/function () {
       }).length;
       this.setContent(text);
       this.setWords(words);
-      this.dashboard.update(words);
-      this.dashboard.updatePercentage();
+      this.dashboard.update();
       this.sendUpdate();
     }
   }, {
@@ -13721,13 +13727,13 @@ var File = /*#__PURE__*/function () {
     key: "setWords",
     value: function setWords(words, updateDashboard) {
       this.data.words = words;
-      if (updateDashboard) this.dashboard.update(this.data.words);
+      if (updateDashboard) this.dashboard.update();
     }
   }, {
     key: "setTarget",
     value: function setTarget(target, updateField) {
       this.data.target = target;
-      this.dashboard.setTarget(target, updateField);
+      this.dashboard.update(true);
       this.sendUpdate();
     }
   }]);
@@ -13747,4 +13753,41 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 
 var file = window.file = new _file["default"]();
 
-},{"./file":6}]},{},[7]);
+},{"./file":6}],8:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var ProgressBar = /*#__PURE__*/function () {
+  function ProgressBar(words, target) {
+    _classCallCheck(this, ProgressBar);
+
+    this.el = document.createElement('style');
+    document.head.appendChild(this.el);
+    if (words && target) this.update(words, target);
+  }
+
+  _createClass(ProgressBar, [{
+    key: "update",
+    value: function update(words, target) {
+      var percentage = Math.floor(words / target * 100).toFixed(0);
+      this.el.textContent = "#word-count:before { width: ".concat(percentage, "% !important; }");
+    }
+  }]);
+
+  return ProgressBar;
+}();
+
+exports["default"] = ProgressBar;
+;
+
+},{}]},{},[7]);

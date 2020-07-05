@@ -8,7 +8,15 @@ export default class File {
       words: 0,
       target: 500
     };
+    this.initDashboard();
+    this.initEditor();
+  }
+
+  initDashboard() {
     this.dashboard = new Dashboard(this);
+  }
+
+  initEditor() {
     this.editor = new Editor('#editor', {
       theme: 'snow',
       modules: { toolbar: false }
@@ -19,11 +27,14 @@ export default class File {
 
   handleTextChange() {
     const text = this.editor.getText();
-    const words = text.replace('\n', '').split(' ').filter(w => !!w).length;
+    const words = text
+      .replace('\n', '')
+      .split(' ')
+      .filter(w => !!w)
+      .length;
     this.setContent(text);
     this.setWords(words);
-    this.dashboard.update(words);
-    this.dashboard.updatePercentage();
+    this.dashboard.update();
     this.sendUpdate();
   }
 
@@ -40,12 +51,12 @@ export default class File {
 
   setWords(words, updateDashboard) {
     this.data.words = words;
-    if (updateDashboard) this.dashboard.update(this.data.words);
+    if (updateDashboard) this.dashboard.update();
   }
 
   setTarget(target, updateField) {
     this.data.target = target;
-    this.dashboard.setTarget(target, updateField);
+    this.dashboard.update(true);
     this.sendUpdate();
   }
 };
