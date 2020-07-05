@@ -8,7 +8,11 @@ class File {
     this.webContents = this.window.webContents;
     this.id = this.webContents.id;
     this.filePath = opts.filePath || null;
-    this.data = opts.data || { content: '', words: 0 };
+    this.data = opts.data || {
+      content: '',
+      words: 0,
+      target: 500
+    };
     this.syncData();
   }
 
@@ -71,7 +75,7 @@ function getById(id) {
   return openFiles[id];
 }
 
-ipcMain.on('text-change', (event, id, data) => {
+ipcMain.on('data-change', (event, id, data) => {
   openFiles[id].data = data;
 });
 

@@ -2,8 +2,6 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
     <link rel="stylesheet" href="css/fonts.css">
     <link rel="stylesheet" href="css/quill.snow.css">
     <link rel="stylesheet" href="css/styles.css">
@@ -11,7 +9,12 @@
   </head>
   <body>
     <div id="app">
-      <div id="stats"></div>
+      <div id="stats">
+        <div id="word-count">
+          <span id="current-count"></span>
+          <input id="target" type="number">
+        </div>
+      </div>
       <div id="editor-container">
         <div id="editor"></div>
       </div>

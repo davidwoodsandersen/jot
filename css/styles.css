@@ -66,7 +66,7 @@ body {
   --base-font-size: 16px;
   --editor-font-size: 22px;
   --grey: rgb(240, 240, 240);
-  --contracted-height: 50px;
+  --contracted-height: 60px;
   --side-margin: 40px;
 }
 
@@ -83,6 +83,48 @@ body {
 #stats {
   width: 100vw;
   height: var(--contracted-height);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#word-count {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  width: calc(100vw - var(--side-margin));
+  height: 30px;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+#word-count:before {
+  content: '';
+  z-index: -1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background-color: lightblue;
+  transition: width .3s;
+}
+
+#target {
+  flex: 1;
+  font-family: var(--base-font-family);
+  font-size: var(--base-font-size);
+  background-color: transparent;
+  border: none;
+}
+
+#target:focus {
+  outline: none;
+}
+
+#current-count {
+  align-self: center;
 }
 
 #editor-container {

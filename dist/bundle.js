@@ -13598,16 +13598,49 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 var Dashboard = /*#__PURE__*/function () {
-  function Dashboard() {
+  function Dashboard(file) {
+    var _this = this;
+
     _classCallCheck(this, Dashboard);
 
-    this.container = document.getElementById('stats');
+    this.file = file;
+    this.wordCount = document.getElementById('current-count');
+    this.wordTarget = document.getElementById('target');
+    this.wordTarget.value = this.file.data.target;
+    this.updatePercentage();
+    this.wordTarget.addEventListener('change', function (e) {
+      _this.file.setTarget(Number(e.target.value));
+    });
   }
 
   _createClass(Dashboard, [{
+    key: "updateProgressBar",
+    value: function updateProgressBar(percentage) {
+      if (!this.progressEl) {
+        this.progressEl = document.createElement('style');
+        document.head.appendChild(this.progressEl);
+      }
+
+      this.progressEl.textContent = "#word-count:before { width: ".concat(percentage, "% !important; }");
+    }
+  }, {
+    key: "updatePercentage",
+    value: function updatePercentage() {
+      var words = this.file.data.words;
+      var target = this.file.data.target;
+      var percentage = Math.floor(words / target * 100).toFixed(0);
+      this.updateProgressBar(percentage);
+    }
+  }, {
+    key: "setTarget",
+    value: function setTarget(target, updateField) {
+      this.updatePercentage();
+      if (updateField) this.wordTarget.value = target;
+    }
+  }, {
     key: "update",
     value: function update(wordCount) {
-      this.container.textContent = "Word count: ".concat(wordCount);
+      this.wordCount.textContent = "".concat(wordCount, "/");
     }
   }]);
 
@@ -13616,42 +13649,45 @@ var Dashboard = /*#__PURE__*/function () {
 
 var File = /*#__PURE__*/function () {
   function File() {
-    var _this = this;
-
     _classCallCheck(this, File);
 
     this.data = {
       content: '',
-      words: 0
+      words: 0,
+      target: 500
     };
-    this.dashboard = new Dashboard();
+    this.dashboard = new Dashboard(this);
     this.editor = new _quill["default"]('#editor', {
       theme: 'snow',
       modules: {
         toolbar: false
       }
     });
-    this.editor.on('text-change', function () {
-      var text = _this.editor.getText();
-
-      var words = text.replace('\n', '').split(' ').filter(function (w) {
-        return !!w;
-      }).length;
-
-      _this.setContent(text);
-
-      _this.setWords(words);
-
-      _this.dashboard.update(words);
-
-      if (!!window.ipc && typeof window.windowId === 'number') {
-        window.ipc.send('text-change', window.windowId, _this.data);
-      }
-    });
+    this.editor.on('text-change', this.handleTextChange.bind(this));
     this.editor.focus();
   }
 
   _createClass(File, [{
+    key: "handleTextChange",
+    value: function handleTextChange() {
+      var text = this.editor.getText();
+      var words = text.replace('\n', '').split(' ').filter(function (w) {
+        return !!w;
+      }).length;
+      this.setContent(text);
+      this.setWords(words);
+      this.dashboard.update(words);
+      this.dashboard.updatePercentage();
+      this.sendUpdate();
+    }
+  }, {
+    key: "sendUpdate",
+    value: function sendUpdate() {
+      if (!!window.ipc && typeof window.windowId === 'number') {
+        window.ipc.send('data-change', window.windowId, this.data);
+      }
+    }
+  }, {
     key: "setContent",
     value: function setContent(content, updateEditor) {
       this.data.content = content;
@@ -13662,6 +13698,13 @@ var File = /*#__PURE__*/function () {
     value: function setWords(words, updateDashboard) {
       this.data.words = words;
       if (updateDashboard) this.dashboard.update(this.data.words);
+    }
+  }, {
+    key: "setTarget",
+    value: function setTarget(target, updateField) {
+      this.data.target = target;
+      this.dashboard.setTarget(target, updateField);
+      this.sendUpdate();
     }
   }]);
 
