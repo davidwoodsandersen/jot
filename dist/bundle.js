@@ -13587,9 +13587,10 @@ module.exports = __webpack_require__(63);
 },{"buffer":2}],5:[function(require,module,exports){
 "use strict";
 
-var _quill = _interopRequireDefault(require("quill"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -13647,6 +13648,29 @@ var Dashboard = /*#__PURE__*/function () {
   return Dashboard;
 }();
 
+exports["default"] = Dashboard;
+;
+
+},{}],6:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _quill = _interopRequireDefault(require("quill"));
+
+var _dashboard = _interopRequireDefault(require("./dashboard"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
 var File = /*#__PURE__*/function () {
   function File() {
     _classCallCheck(this, File);
@@ -13656,7 +13680,7 @@ var File = /*#__PURE__*/function () {
       words: 0,
       target: 500
     };
-    this.dashboard = new Dashboard(this);
+    this.dashboard = new _dashboard["default"](this);
     this.editor = new _quill["default"]('#editor', {
       theme: 'snow',
       modules: {
@@ -13711,6 +13735,16 @@ var File = /*#__PURE__*/function () {
   return File;
 }();
 
-var file = window.file = new File();
+exports["default"] = File;
+;
 
-},{"quill":4}]},{},[5]);
+},{"./dashboard":5,"quill":4}],7:[function(require,module,exports){
+"use strict";
+
+var _file = _interopRequireDefault(require("./file"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var file = window.file = new _file["default"]();
+
+},{"./file":6}]},{},[7]);
