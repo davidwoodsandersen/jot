@@ -1,4 +1,210 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _progressBar = _interopRequireDefault(require("./progress-bar"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Dashboard = /*#__PURE__*/function () {
+  function Dashboard(file) {
+    _classCallCheck(this, Dashboard);
+
+    this.file = file;
+    this.initDomElements();
+    this.progressBar = new _progressBar["default"](this.file.data.words, this.file.data.target);
+  }
+
+  _createClass(Dashboard, [{
+    key: "initDomElements",
+    value: function initDomElements() {
+      var _this = this;
+
+      this.els = {
+        wordsWritten: document.getElementById('words-written'),
+        wordsTarget: document.getElementById('words-target')
+      };
+      this.els.wordsTarget.value = this.file.data.target;
+      this.els.wordsTarget.addEventListener('change', function (e) {
+        _this.file.setTarget(Number(e.target.value));
+      });
+    }
+  }, {
+    key: "setWordCount",
+    value: function setWordCount(words) {
+      this.els.wordsWritten.textContent = "".concat(words, "/");
+    }
+  }, {
+    key: "update",
+    value: function update(setTarget) {
+      if (setTarget) {
+        this.els.wordsTarget.value = this.file.data.target;
+      }
+
+      this.setWordCount(this.file.data.words);
+      this.progressBar.update(this.file.data.words, this.file.data.target);
+    }
+  }]);
+
+  return Dashboard;
+}();
+
+exports["default"] = Dashboard;
+;
+
+},{"./progress-bar":4}],2:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _quill = _interopRequireDefault(require("quill"));
+
+var _dashboard = _interopRequireDefault(require("./dashboard"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var File = /*#__PURE__*/function () {
+  function File() {
+    _classCallCheck(this, File);
+
+    this.data = {
+      content: '',
+      words: 0,
+      target: 500
+    };
+    this.initDashboard();
+    this.initEditor();
+  }
+
+  _createClass(File, [{
+    key: "initDashboard",
+    value: function initDashboard() {
+      this.dashboard = new _dashboard["default"](this);
+    }
+  }, {
+    key: "initEditor",
+    value: function initEditor() {
+      this.editor = new _quill["default"]('#editor', {
+        theme: 'snow',
+        modules: {
+          toolbar: false
+        }
+      });
+      this.editor.on('text-change', this.handleTextChange.bind(this));
+      this.editor.focus();
+    }
+  }, {
+    key: "handleTextChange",
+    value: function handleTextChange() {
+      var text = this.editor.getText();
+      var words = text.replace('\n', '').split(' ').filter(function (w) {
+        return !!w;
+      }).length;
+      this.setContent(text);
+      this.setWords(words);
+      this.dashboard.update();
+      this.sendUpdate();
+    }
+  }, {
+    key: "sendUpdate",
+    value: function sendUpdate() {
+      if (!!window.ipc && typeof window.windowId === 'number') {
+        window.ipc.send('data-change', window.windowId, this.data);
+      }
+    }
+  }, {
+    key: "setContent",
+    value: function setContent(content, updateEditor) {
+      this.data.content = content;
+      if (updateEditor) this.editor.setText(content);
+    }
+  }, {
+    key: "setWords",
+    value: function setWords(words, updateDashboard) {
+      this.data.words = words;
+      if (updateDashboard) this.dashboard.update();
+    }
+  }, {
+    key: "setTarget",
+    value: function setTarget(target, updateField) {
+      this.data.target = target;
+      this.dashboard.update(true);
+      this.sendUpdate();
+    }
+  }]);
+
+  return File;
+}();
+
+exports["default"] = File;
+;
+
+},{"./dashboard":1,"quill":8}],3:[function(require,module,exports){
+"use strict";
+
+var _file = _interopRequireDefault(require("./file"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var file = window.file = new _file["default"]();
+
+},{"./file":2}],4:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var ProgressBar = /*#__PURE__*/function () {
+  function ProgressBar(words, target) {
+    _classCallCheck(this, ProgressBar);
+
+    this.el = document.createElement('style');
+    document.head.appendChild(this.el);
+    if (words && target) this.update(words, target);
+  }
+
+  _createClass(ProgressBar, [{
+    key: "update",
+    value: function update(words, target) {
+      var percentage = Math.floor(words / target * 100).toFixed(0);
+      this.el.textContent = "#word-count:before { width: ".concat(percentage, "% !important; }");
+    }
+  }]);
+
+  return ProgressBar;
+}();
+
+exports["default"] = ProgressBar;
+;
+
+},{}],5:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -152,7 +358,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],2:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 (function (Buffer){
 /*!
  * The buffer module from node.js, for the browser.
@@ -1933,7 +2139,7 @@ function numberIsNaN (obj) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"base64-js":1,"buffer":2,"ieee754":3}],3:[function(require,module,exports){
+},{"base64-js":5,"buffer":6,"ieee754":7}],7:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
@@ -2019,7 +2225,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],4:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 (function (Buffer){
 /*!
  * Quill Editor v1.3.7
@@ -13584,210 +13790,4 @@ module.exports = __webpack_require__(63);
 /******/ ])["default"];
 });
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],5:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
-var _progressBar = _interopRequireDefault(require("./progress-bar"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Dashboard = /*#__PURE__*/function () {
-  function Dashboard(file) {
-    _classCallCheck(this, Dashboard);
-
-    this.file = file;
-    this.initDomElements();
-    this.progressBar = new _progressBar["default"](this.file.data.words, this.file.data.target);
-  }
-
-  _createClass(Dashboard, [{
-    key: "initDomElements",
-    value: function initDomElements() {
-      var _this = this;
-
-      this.els = {
-        wordsWritten: document.getElementById('words-written'),
-        wordsTarget: document.getElementById('words-target')
-      };
-      this.els.wordsTarget.value = this.file.data.target;
-      this.els.wordsTarget.addEventListener('change', function (e) {
-        _this.file.setTarget(Number(e.target.value));
-      });
-    }
-  }, {
-    key: "setWordCount",
-    value: function setWordCount(words) {
-      this.els.wordsWritten.textContent = "".concat(words, "/");
-    }
-  }, {
-    key: "update",
-    value: function update(setTarget) {
-      if (setTarget) {
-        this.els.wordsTarget.value = this.file.data.target;
-      }
-
-      this.setWordCount(this.file.data.words);
-      this.progressBar.update(this.file.data.words, this.file.data.target);
-    }
-  }]);
-
-  return Dashboard;
-}();
-
-exports["default"] = Dashboard;
-;
-
-},{"./progress-bar":8}],6:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
-var _quill = _interopRequireDefault(require("quill"));
-
-var _dashboard = _interopRequireDefault(require("./dashboard"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var File = /*#__PURE__*/function () {
-  function File() {
-    _classCallCheck(this, File);
-
-    this.data = {
-      content: '',
-      words: 0,
-      target: 500
-    };
-    this.initDashboard();
-    this.initEditor();
-  }
-
-  _createClass(File, [{
-    key: "initDashboard",
-    value: function initDashboard() {
-      this.dashboard = new _dashboard["default"](this);
-    }
-  }, {
-    key: "initEditor",
-    value: function initEditor() {
-      this.editor = new _quill["default"]('#editor', {
-        theme: 'snow',
-        modules: {
-          toolbar: false
-        }
-      });
-      this.editor.on('text-change', this.handleTextChange.bind(this));
-      this.editor.focus();
-    }
-  }, {
-    key: "handleTextChange",
-    value: function handleTextChange() {
-      var text = this.editor.getText();
-      var words = text.replace('\n', '').split(' ').filter(function (w) {
-        return !!w;
-      }).length;
-      this.setContent(text);
-      this.setWords(words);
-      this.dashboard.update();
-      this.sendUpdate();
-    }
-  }, {
-    key: "sendUpdate",
-    value: function sendUpdate() {
-      if (!!window.ipc && typeof window.windowId === 'number') {
-        window.ipc.send('data-change', window.windowId, this.data);
-      }
-    }
-  }, {
-    key: "setContent",
-    value: function setContent(content, updateEditor) {
-      this.data.content = content;
-      if (updateEditor) this.editor.setText(content);
-    }
-  }, {
-    key: "setWords",
-    value: function setWords(words, updateDashboard) {
-      this.data.words = words;
-      if (updateDashboard) this.dashboard.update();
-    }
-  }, {
-    key: "setTarget",
-    value: function setTarget(target, updateField) {
-      this.data.target = target;
-      this.dashboard.update(true);
-      this.sendUpdate();
-    }
-  }]);
-
-  return File;
-}();
-
-exports["default"] = File;
-;
-
-},{"./dashboard":5,"quill":4}],7:[function(require,module,exports){
-"use strict";
-
-var _file = _interopRequireDefault(require("./file"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-var file = window.file = new _file["default"]();
-
-},{"./file":6}],8:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var ProgressBar = /*#__PURE__*/function () {
-  function ProgressBar(words, target) {
-    _classCallCheck(this, ProgressBar);
-
-    this.el = document.createElement('style');
-    document.head.appendChild(this.el);
-    if (words && target) this.update(words, target);
-  }
-
-  _createClass(ProgressBar, [{
-    key: "update",
-    value: function update(words, target) {
-      var percentage = Math.floor(words / target * 100).toFixed(0);
-      this.el.textContent = "#word-count:before { width: ".concat(percentage, "% !important; }");
-    }
-  }]);
-
-  return ProgressBar;
-}();
-
-exports["default"] = ProgressBar;
-;
-
-},{}]},{},[7]);
+},{"buffer":6}]},{},[3]);

@@ -1,7 +1,7 @@
 const { app, BrowserWindow, Menu } = require('electron');
-const menu = require('./menu');
-const store = require('./store');
-const actions = require('./actions');
+const menu = require('./server/menu');
+const store = require('./server/store');
+const actions = require('./server/actions');
 
 let initialFile;
 

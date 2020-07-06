@@ -8,7 +8,7 @@ function createWindow() {
     width: store.get('windowWidth'),
     height: store.get('windowHeight'),
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, '../client/dist/preload.js'),
       nodeIntegration: true
     }
   });
@@ -17,7 +17,7 @@ function createWindow() {
     store.set('windowWidth', width);
     store.set('windowHeight', height);
   });
-  window.loadFile('index.html');
+  window.loadFile('./client/dist/index.html');
   return window;
 }
 
